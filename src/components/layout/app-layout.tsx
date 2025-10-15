@@ -23,7 +23,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2">
                 <Image src="/logo.svg" alt="All American Assets" width={32} height={32} />
                 <div className="group-data-[collapsed=icon]:hidden">
-                    <p className="font-semibold text-lg">All American Assets</p>
+                    <p className="font-semibold text-lg">American Assets</p>
                     <p className="text-xs text-muted-foreground">Precious Metals & Gold IRAs</p>
                 </div>
             </div>
