@@ -84,30 +84,30 @@ const getStatusBadgeVariant = (status: string) => {
   }
 };
 
-const ProspectCard = ({ prospect, onStatusChange }: { prospect: Prospect, onStatusChange: (id: string, status: string) => void }) => {
+const ProspectCard = ({ prospect, onStatusChange, isOverlay = false, ...props }: { prospect: Prospect, onStatusChange: (id: string, status: string) => void, isOverlay?: boolean, [key: string]: any }) => {
     return (
-        <Card className="mb-4">
-            <CardContent className="p-4 space-y-3">
+        <Card className={`mb-4 ${isOverlay ? 'shadow-lg' : ''}`} {...props}>
+            <CardContent className="p-4 space-y-4">
                 <div className="flex justify-between items-start">
                     <div>
-                        <p className="font-medium">{prospect.name}</p>
+                        <p className="font-semibold text-base">{prospect.name}</p>
                         <p className="text-sm text-muted-foreground">{prospect.email}</p>
                     </div>
                      <Select value={prospect.status} onValueChange={(value) => onStatusChange(prospect.id, value)}>
-                        <SelectTrigger className="w-[120px] text-xs h-8">
+                        <SelectTrigger className="w-[130px] text-xs h-8">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent>
-                            {initialStatuses.map(s => <SelectItem key={s} value={s}><Badge className="w-full" variant={getStatusBadgeVariant(s)}>{s}</Badge></SelectItem>)}
+                            {initialStatuses.map(s => <SelectItem key={s} value={s}><Badge className="w-full justify-center" variant={getStatusBadgeVariant(s)}>{s}</Badge></SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
-                 <div className="text-xs text-muted-foreground">Lead Source: {prospect.leadSource}</div>
-
+                <div className="text-sm text-muted-foreground">Lead Source: <span className="font-medium text-foreground">{prospect.leadSource}</span></div>
+                
                 {prospect.followUp && (
-                    <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
-                        <AlertCircle className="h-4 w-4" />
-                        <span className="text-xs font-medium">Two Weeks No Contact, Follow Up Now?</span>
+                    <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-950/50 p-2 rounded-md">
+                        <AlertCircle className="h-5 w-5" />
+                        <span className="text-xs font-semibold">Two Weeks No Contact, Follow Up Now?</span>
                     </div>
                 )}
             </CardContent>
@@ -120,8 +120,13 @@ const SortableProspectCard = ({ prospect, onStatusChange }: { prospect: Prospect
     const style = { transform: CSS.Transform.toString(transform), transition };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-            <ProspectCard prospect={prospect} onStatusChange={onStatusChange} />
+        <div ref={setNodeRef} style={style} >
+            <div className="relative">
+                 <ProspectCard prospect={prospect} onStatusChange={onStatusChange} />
+                 <div className="absolute top-4 right-4 text-muted-foreground cursor-grab" {...attributes} {...listeners}>
+                    <GripVertical className="h-5 w-5" />
+                </div>
+            </div>
         </div>
     )
 }
@@ -137,7 +142,9 @@ const KanbanColumn = ({ status, prospects, onStatusChange }: { status: string, p
                         <Badge variant={getStatusBadgeVariant(status)}>{prospects.length}</Badge>
                     </h3>
                     <SortableContext items={prospects.map(p => p.id)} strategy={verticalListSortingStrategy}>
-                        {prospects.map(p => <SortableProspectCard key={p.id} prospect={p} onStatusChange={onStatusChange} />)}
+                        <div className="space-y-4">
+                            {prospects.map(p => <SortableProspectCard key={p.id} prospect={p} onStatusChange={onStatusChange} />)}
+                        </div>
                     </SortableContext>
                 </CardContent>
             </Card>
@@ -237,7 +244,7 @@ export default function ProspectsPage() {
                         ))}
                     </SortableContext>
                     <DragOverlay>
-                        {activeProspect ? <ProspectCard prospect={activeProspect} onStatusChange={handleStatusChange} /> : null}
+                        {activeProspect ? <ProspectCard prospect={activeProspect} onStatusChange={handleStatusChange} isOverlay /> : null}
                     </DragOverlay>
                 </div>
             )}
@@ -282,7 +289,7 @@ export default function ProspectsPage() {
                                             <Badge variant={getStatusBadgeVariant(prospect.status)}>{prospect.status}</Badge>
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {initialStatuses.map(s => <SelectItem key={s} value={s}><Badge className="w-full" variant={getStatusBadgeVariant(s)}>{s}</Badge></SelectItem>)}
+                                            {initialStatuses.map(s => <SelectItem key={s} value={s}><Badge className="w-full justify-center" variant={getStatusBadgeVariant(s)}>{s}</Badge></SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
