@@ -152,7 +152,7 @@ const KanbanColumn = ({ status, prospects, statuses }: { status: Status, prospec
     const totalValue = prospects.reduce((sum, p) => sum + (p.dealValue || 0), 0);
 
     return (
-        <div ref={setNodeRef} className="w-full md:w-[320px] flex-shrink-0">
+        <div ref={setNodeRef} className="w-[300px] flex-shrink-0">
             <Card className="bg-muted/50 h-full flex flex-col">
                 <CardHeader className="pb-2 border-b">
                     <div className="flex justify-between items-center">
@@ -241,7 +241,7 @@ export default function ProspectsPage() {
   
   const scrollKanban = (direction: 'left' | 'right') => {
     if (kanbanContainerRef.current) {
-        const scrollAmount = direction === 'left' ? -340 : 340;
+        const scrollAmount = direction === 'left' ? -320 : 320;
         kanbanContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   }
@@ -278,7 +278,7 @@ export default function ProspectsPage() {
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={onDragStart} onDragEnd={onDragEnd}>
             {view === 'kanban' && (
-                 <div ref={kanbanContainerRef} className="flex flex-col md:flex-row gap-4 pb-4 md:overflow-x-auto">
+                 <div ref={kanbanContainerRef} className="flex gap-4 pb-4 overflow-x-auto">
                     <SortableContext items={statuses.map(s => s.id)} strategy={horizontalListSortingStrategy}>
                         {statuses.map(status => (
                             <KanbanColumn 
