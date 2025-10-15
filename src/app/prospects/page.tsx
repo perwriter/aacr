@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, GripVertical, LayoutGrid, List, MoreHorizontal, Phone, Trello } from 'lucide-react';
+import { AlertCircle, GripVertical, LayoutGrid, List, MoreHorizontal, Phone, Trello, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragOverlay, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
@@ -83,26 +83,30 @@ const ProspectCard = ({ prospect, isOverlay = false, ...props }: { prospect: Pro
     return (
         <Card className={`mb-4 ${isOverlay ? 'shadow-lg' : 'shadow-sm hover:shadow-md transition-shadow'}`} {...props}>
             <CardContent className="p-4 space-y-3 relative">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute top-1 right-1 h-7 w-7"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenuItem>Edit Prospect</DropdownMenuItem>
-                        <DropdownMenuItem>Archive Prospect</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="absolute top-2 right-2 flex items-center">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem>Edit Prospect</DropdownMenuItem>
+                            <DropdownMenuItem>Archive Prospect</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
 
-                <div className="space-y-1 pr-8">
-                    <p className="font-bold text-base leading-tight truncate" title={prospect.name}>{prospect.name}</p>
-                    <p className="text-sm text-muted-foreground">{prospect.email}</p>
+                <div className="flex items-start gap-3">
+                    <div className="space-y-1 pr-8 flex-grow">
+                        <p className="font-bold text-base leading-tight truncate" title={prospect.name}>{prospect.name}</p>
+                        <p className="text-sm text-muted-foreground">{prospect.email}</p>
+                    </div>
                 </div>
                 
                 <div className="text-xs text-muted-foreground">Lead Source: <span className="font-medium text-foreground">{prospect.leadSource}</span></div>
@@ -129,13 +133,20 @@ const SortableProspectCard = ({ prospect }: { prospect: Prospect }) => {
     const style = { transform: CSS.Transform.toString(transform), transition };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-            <ProspectCard prospect={prospect} />
+        <div ref={setNodeRef} style={style}>
+            <div className="flex items-center">
+                <div {...attributes} {...listeners} className="cursor-grab p-2 text-muted-foreground hover:bg-accent rounded-l-md">
+                    <GripVertical className="h-5 w-5" />
+                </div>
+                <div className="flex-grow">
+                    <ProspectCard prospect={prospect} />
+                </div>
+            </div>
         </div>
     )
 }
 
-const KanbanColumn = ({ status, prospects, onStatusChange }: { status: {id: string, title: string, color: string}, prospects: Prospect[], onStatusChange: (id: string, status: string) => void }) => {
+const KanbanColumn = ({ status, prospects }: { status: {id: string, title: string, color: string}, prospects: Prospect[]}) => {
     const { setNodeRef } = useSortable({ id: status.id });
     const totalValue = prospects.reduce((sum, p) => sum + (p.dealValue || 0), 0);
 
@@ -178,6 +189,7 @@ export default function ProspectsPage() {
   const [prospects, setProspects] = useState<Prospect[]>(initialProspects);
   const [statuses] = useState(initialStatuses);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const kanbanContainerRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -199,7 +211,6 @@ export default function ProspectsPage() {
 
     const overId = over.id as string;
 
-    // Dropped on a column
     if (statuses.some(s => s.id === overId) && activeProspect.status !== overId) {
         setProspects(prev => arrayMove(prev.map(p => p.id === active.id ? { ...p, status: overId } : p), prev.findIndex(p => p.id === active.id), prev.length -1 ));
         return;
@@ -208,7 +219,6 @@ export default function ProspectsPage() {
     const overProspect = prospects.find(p => p.id === overId);
     if (!overProspect) return;
 
-    // Dropped on another prospect card
     if (active.id !== over.id) {
         const oldIndex = prospects.findIndex(p => p.id === active.id);
         const newIndex = prospects.findIndex(p => p.id === over.id);
@@ -224,6 +234,13 @@ export default function ProspectsPage() {
   };
 
   const activeProspect = activeId ? prospects.find(p => p.id === activeId) : null;
+  
+  const scrollKanban = (direction: 'left' | 'right') => {
+    if (kanbanContainerRef.current) {
+        const scrollAmount = direction === 'left' ? -340 : 340;
+        kanbanContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  }
 
   return (
     <AppLayout>
@@ -243,6 +260,12 @@ export default function ProspectsPage() {
                 ))}
             </div>
             <div className="flex items-center gap-2">
+                {view === 'kanban' && (
+                  <>
+                    <Button variant="outline" size="icon" onClick={() => scrollKanban('left')}><ChevronLeft /></Button>
+                    <Button variant="outline" size="icon" onClick={() => scrollKanban('right')}><ChevronRight /></Button>
+                  </>
+                )}
                 <Button variant={view === 'kanban' ? 'default' : 'outline'} size="icon" onClick={() => setView('kanban')}><Trello/></Button>
                 <Button variant={view === 'list' ? 'default' : 'outline'} size="icon" onClick={() => setView('list')}><List/></Button>
                 <Button variant={view === 'grid' ? 'default' : 'outline'} size="icon" onClick={() => setView('grid')}><LayoutGrid/></Button>
@@ -251,14 +274,13 @@ export default function ProspectsPage() {
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={onDragStart} onDragEnd={onDragEnd}>
             {view === 'kanban' && (
-                 <div className="flex gap-4 pb-4 overflow-x-auto">
+                 <div ref={kanbanContainerRef} className="flex gap-4 pb-4 overflow-x-auto">
                     <SortableContext items={statuses.map(s => s.id)} strategy={horizontalListSortingStrategy}>
                         {statuses.map(status => (
                             <KanbanColumn 
                                 key={status.id} 
                                 status={status} 
                                 prospects={prospects.filter(p => p.status === status.id)}
-                                onStatusChange={handleStatusChange}
                             />
                         ))}
                     </SortableContext>
