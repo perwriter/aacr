@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,13 +26,13 @@ const initialStatuses = [
 ];
 
 const initialProspects = [
-  {
+    {
     id: '1',
     name: 'Monica Bing',
     email: 'monica.bing@example.com',
     leadSource: 'Website',
     phone: '555-5003',
-    status: 'Qualified',
+    status: 'Prospect',
     lastContacted: 'Oct 1, 2025',
     followUp: true,
     dealValue: 50000,
@@ -73,13 +73,14 @@ const initialProspects = [
 ];
 
 type Prospect = typeof initialProspects[0];
+type Status = { id: string; title: string; color: string };
 
-const getStatusInfo = (status: string) => {
-    return initialStatuses.find(s => s.id === status) || { title: status, color: '#808080' };
+const getStatusInfo = (statuses: Status[], status: string) => {
+    return statuses.find(s => s.id === status) || { title: status, color: '#808080' };
 }
 
-const ProspectCard = ({ prospect, isOverlay = false, ...props }: { prospect: Prospect, isOverlay?: boolean, [key: string]: any }) => {
-    const statusInfo = getStatusInfo(prospect.status);
+const ProspectCard = ({ prospect, statuses, isOverlay = false, ...props }: { prospect: Prospect, statuses: Status[], isOverlay?: boolean, [key: string]: any }) => {
+    const statusInfo = getStatusInfo(statuses, prospect.status);
     return (
         <Card className={`mb-4 bg-background ${isOverlay ? 'shadow-lg' : 'shadow-sm hover:shadow-md transition-shadow'}`} {...props}>
             <CardContent className="p-4 space-y-3 relative">
@@ -128,7 +129,7 @@ const ProspectCard = ({ prospect, isOverlay = false, ...props }: { prospect: Pro
     )
 }
 
-const SortableProspectCard = ({ prospect }: { prospect: Prospect }) => {
+const SortableProspectCard = ({ prospect, statuses }: { prospect: Prospect, statuses: Status[] }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: prospect.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
 
@@ -139,19 +140,19 @@ const SortableProspectCard = ({ prospect }: { prospect: Prospect }) => {
                     <GripVertical className="h-5 w-5" />
                 </div>
                 <div className="flex-grow">
-                    <ProspectCard prospect={prospect} />
+                    <ProspectCard prospect={prospect} statuses={statuses} />
                 </div>
             </div>
         </div>
     )
 }
 
-const KanbanColumn = ({ status, prospects }: { status: {id: string, title: string, color: string}, prospects: Prospect[]}) => {
+const KanbanColumn = ({ status, prospects, statuses }: { status: Status, prospects: Prospect[], statuses: Status[]}) => {
     const { setNodeRef } = useSortable({ id: status.id });
     const totalValue = prospects.reduce((sum, p) => sum + (p.dealValue || 0), 0);
 
     return (
-        <div ref={setNodeRef} className="w-[300px] flex-shrink-0">
+        <div ref={setNodeRef} className="w-full md:w-[320px] flex-shrink-0">
             <Card className="bg-muted/50 h-full flex flex-col">
                 <CardHeader className="pb-2 border-b">
                     <div className="flex justify-between items-center">
@@ -175,7 +176,7 @@ const KanbanColumn = ({ status, prospects }: { status: {id: string, title: strin
                 </CardHeader>
                 <CardContent className="flex-1 space-y-3 p-4 pt-2 overflow-y-auto min-h-[200px]">
                     <SortableContext items={prospects.map(p => p.id)} strategy={verticalListSortingStrategy}>
-                        {prospects.map(p => <SortableProspectCard key={p.id} prospect={p} />)}
+                        {prospects.map(p => <SortableProspectCard key={p.id} prospect={p} statuses={statuses} />)}
                     </SortableContext>
                 </CardContent>
             </Card>
@@ -210,9 +211,10 @@ export default function ProspectsPage() {
     if (!activeProspect) return;
 
     const overId = over.id as string;
+    const overIsColumn = statuses.some(s => s.id === overId);
 
-    if (statuses.some(s => s.id === overId) && activeProspect.status !== overId) {
-        setProspects(prev => arrayMove(prev.map(p => p.id === active.id ? { ...p, status: overId } : p), prev.findIndex(p => p.id === active.id), prev.length -1 ));
+    if (overIsColumn && activeProspect.status !== overId) {
+        handleStatusChange(active.id as string, overId);
         return;
     }
 
@@ -233,7 +235,9 @@ export default function ProspectsPage() {
     }
   };
 
-  const activeProspect = activeId ? prospects.find(p => p.id === activeId) : null;
+  const activeProspect = useMemo(() => {
+    return activeId ? prospects.find(p => p.id === activeId) : null;
+  }, [activeId, prospects]);
   
   const scrollKanban = (direction: 'left' | 'right') => {
     if (kanbanContainerRef.current) {
@@ -244,13 +248,13 @@ export default function ProspectsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 max-w-7xl">
+      <div className="space-y-6">
         <div>
           <h2 className="font-headline text-3xl">Prospects</h2>
           <p className="text-muted-foreground">Manage your potential clients.</p>
         </div>
 
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center gap-4">
             <div className="flex flex-wrap items-center gap-2">
                 <Button variant="outline">ALL ({prospects.length})</Button>
                 {statuses.map((status) => (
@@ -262,8 +266,8 @@ export default function ProspectsPage() {
             <div className="flex items-center gap-2">
                 {view === 'kanban' && (
                   <>
-                    <Button variant="outline" size="icon" onClick={() => scrollKanban('left')}><ChevronLeft /></Button>
-                    <Button variant="outline" size="icon" onClick={() => scrollKanban('right')}><ChevronRight /></Button>
+                    <Button variant="outline" size="icon" onClick={() => scrollKanban('left')} className="hidden md:inline-flex"><ChevronLeft /></Button>
+                    <Button variant="outline" size="icon" onClick={() => scrollKanban('right')} className="hidden md:inline-flex"><ChevronRight /></Button>
                   </>
                 )}
                 <Button variant={view === 'kanban' ? 'default' : 'outline'} size="icon" onClick={() => setView('kanban')}><Trello/></Button>
@@ -274,18 +278,19 @@ export default function ProspectsPage() {
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={onDragStart} onDragEnd={onDragEnd}>
             {view === 'kanban' && (
-                 <div ref={kanbanContainerRef} className="flex gap-4 pb-4 overflow-x-auto">
+                 <div ref={kanbanContainerRef} className="flex flex-col md:flex-row gap-4 pb-4 md:overflow-x-auto">
                     <SortableContext items={statuses.map(s => s.id)} strategy={horizontalListSortingStrategy}>
                         {statuses.map(status => (
                             <KanbanColumn 
                                 key={status.id} 
-                                status={status} 
+                                status={status}
+                                statuses={statuses}
                                 prospects={prospects.filter(p => p.status === status.id)}
                             />
                         ))}
                     </SortableContext>
                     <DragOverlay>
-                        {activeProspect ? <ProspectCard prospect={activeProspect} isOverlay /> : null}
+                        {activeProspect ? <ProspectCard prospect={activeProspect} statuses={statuses} isOverlay /> : null}
                     </DragOverlay>
                 </div>
             )}
@@ -294,6 +299,7 @@ export default function ProspectsPage() {
         {view === 'list' && (
             <Card>
                 <CardContent className="p-0">
+                  <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -342,6 +348,7 @@ export default function ProspectsPage() {
                             ))}
                         </TableBody>
                     </Table>
+                  </div>
                 </CardContent>
             </Card>
         )}
@@ -349,7 +356,7 @@ export default function ProspectsPage() {
         {view === 'grid' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {prospects.map(prospect => (
-                    <ProspectCard key={prospect.id} prospect={prospect} />
+                    <ProspectCard key={prospect.id} prospect={prospect} statuses={statuses} />
                 ))}
             </div>
         )}
