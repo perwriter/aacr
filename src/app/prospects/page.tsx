@@ -147,7 +147,9 @@ const SortableProspectCard = ({ prospect, statuses }: { prospect: Prospect, stat
                 </div>
                 <div className="flex-grow">
                      <ProspectSheet prospect={prospect} statuses={statuses}>
-                        <ProspectCard prospect={prospect} statuses={statuses} />
+                        <div className="cursor-pointer">
+                            <ProspectCard prospect={prospect} statuses={statuses} />
+                        </div>
                     </ProspectSheet>
                 </div>
             </div>
@@ -388,7 +390,7 @@ export default function ProspectsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-7xl">
         <div>
           <h2 className="font-headline text-3xl">Prospects</h2>
           <p className="text-muted-foreground">Manage your potential clients.</p>
@@ -425,7 +427,7 @@ export default function ProspectsPage() {
           {view === 'kanban' && (
             <div
               ref={kanbanContainerRef}
-              className="flex gap-4 pb-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent scroll-smooth"
+              className="flex gap-4 pb-4 overflow-x-auto"
             >
               <SortableContext
                 items={statuses.map((s) => s.id)}
@@ -518,7 +520,9 @@ export default function ProspectsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {prospects.map(prospect => (
                    <ProspectSheet key={prospect.id} prospect={prospect} statuses={statuses}>
-                        <ProspectCard prospect={prospect} statuses={statuses} />
+                        <div className="cursor-pointer">
+                            <ProspectCard prospect={prospect} statuses={statuses} />
+                        </div>
                    </ProspectSheet>
                 ))}
             </div>
