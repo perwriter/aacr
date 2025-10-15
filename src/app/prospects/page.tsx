@@ -184,7 +184,7 @@ const KanbanColumn = ({ status, prospects, statuses }: { status: Status, prospec
                       ${totalValue.toLocaleString()} in this stage
                     </p>
                 </CardHeader>
-                <CardContent className="flex-1 space-y-3 p-4 pt-2 overflow-y-auto min-h-[200px]">
+                <CardContent className="flex-1 p-4 pt-2 overflow-y-auto min-h-[200px]">
                     <SortableContext items={prospects.map(p => p.id)} strategy={verticalListSortingStrategy}>
                         {prospects.map(p => <SortableProspectCard key={p.id} prospect={p} statuses={statuses} />)}
                     </SortableContext>
@@ -397,7 +397,7 @@ export default function ProspectsPage() {
         </div>
 
         <div className="flex flex-wrap justify-between items-center gap-4">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className={`flex flex-wrap items-center gap-2 ${view === 'kanban' ? 'hidden' : ''}`}>
                 <Button variant="outline">ALL ({prospects.length})</Button>
                 {statuses.map((status) => (
                     <Button key={status.id} variant="outline">
