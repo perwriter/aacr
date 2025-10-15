@@ -3,8 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'KanaFlow',
-  description: 'A simple CM with kana design and draggable cards.',
+  title: 'All American Assets',
+  description: 'CRM for Precious Metals & Gold IRAs',
 };
 
 export default function RootLayout({

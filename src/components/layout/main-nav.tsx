@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, Columns, Home, PenSquare } from 'lucide-react';
+import { LayoutGrid, Users, Briefcase } from 'lucide-react';
 
 import {
   SidebarMenu,
@@ -11,10 +11,9 @@ import {
 } from '@/components/ui/sidebar';
 
 const links = [
-  { href: '/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/hiragana', label: 'Hiragana', icon: BookOpen },
-  { href: '/katakana', label: 'Katakana', icon: PenSquare },
-  { href: '/board', label: 'Board', icon: Columns },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
+  { href: '/prospects', label: 'Prospects', icon: Briefcase },
+  { href: '/clients', label: 'Clients', icon: Users },
 ];
 
 export function MainNav() {
@@ -24,7 +23,7 @@ export function MainNav() {
     <SidebarMenu>
       {links.map((link) => (
         <SidebarMenuItem key={link.href}>
-          <Link href={link.href} legacyBehavior={false}>
+          <Link href={link.href}>
             <SidebarMenuButton
               isActive={pathname === link.href}
               tooltip={link.label}

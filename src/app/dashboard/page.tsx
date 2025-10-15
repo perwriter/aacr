@@ -1,68 +1,95 @@
-import Link from 'next/link';
-import { ArrowRight, BookOpen, Columns, PenSquare } from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AppLayout } from '@/components/layout/app-layout';
+import { Calendar, Users, Briefcase, TrendingUp, DollarSign } from 'lucide-react';
 
-const features = [
-  {
-    title: 'Hiragana Chart',
-    description: 'Explore all the basic hiragana characters.',
-    href: '/hiragana',
-    icon: BookOpen,
-  },
-  {
-    title: 'Katakana Chart',
-    description: 'Dive into the world of katakana for foreign words.',
-    href: '/katakana',
-    icon: PenSquare,
-  },
-  {
-    title: 'Interactive Board',
-    description: 'Practice by dragging and dropping kana characters.',
-    href: '/board',
-    icon: Columns,
-  },
-];
+const StatCard = ({
+  title,
+  value,
+  icon,
+  description,
+  color = 'bg-background',
+}: {
+  title: string;
+  value: string;
+  icon: React.ElementType;
+  description: string;
+  color?: string;
+}) => {
+  const Icon = icon;
+  return (
+    <Card className={`${color} transition-shadow hover:shadow-lg`}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <div className="rounded-full bg-foreground/10 p-2">
+            <Icon className="h-5 w-5 text-foreground" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-4xl font-bold">{value}</div>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
+  );
+};
+
+const AppointmentCard = ({ title }: { title: string }) => (
+  <Card className="col-span-1 lg:col-span-2">
+    <CardHeader className="flex flex-row items-center justify-between">
+      <div className='flex items-center gap-2'>
+        <Calendar className="h-5 w-5 text-primary" />
+        <CardTitle className="text-xl">{title}</CardTitle>
+      </div>
+      <button className="p-1 rounded-full hover:bg-muted">
+        <Calendar className="h-5 w-5 text-muted-foreground" />
+      </button>
+    </CardHeader>
+    <CardContent className="flex flex-col items-center justify-center pt-8 pb-16 text-center">
+        <div className="rounded-full bg-muted p-4 mb-4">
+            <Calendar className="h-10 w-10 text-muted-foreground" />
+        </div>
+        <p className="text-muted-foreground">No today's appointments</p>
+    </CardContent>
+  </Card>
+);
 
 export default function DashboardPage() {
   return (
     <AppLayout>
-      <div className="flex flex-col gap-8">
-        <div className="grid gap-2">
-          <h1 className="font-headline text-3xl md:text-4xl">Welcome to KanaFlow</h1>
-          <p className="text-lg text-muted-foreground">
-            Your personal space to master Japanese kana.
-          </p>
+      <div className="space-y-8">
+        <div>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-primary" />
+                    Live Metal Prices
+                </h2>
+                <p className="text-xs text-muted-foreground">Updates every 30 seconds</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+                <StatCard
+                title="Gold"
+                value="$4,196.62"
+                description="Per Troy Ounce"
+                icon={DollarSign}
+                color="bg-yellow-100/50 dark:bg-yellow-900/30"
+                />
+                <StatCard
+                title="Silver"
+                value="$52.58"
+                description="Per Troy Ounce"
+                icon={DollarSign}
+                color="bg-slate-200/50 dark:bg-slate-800/30"
+                />
+            </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
-            <Card key={feature.title} className="flex flex-col transition-shadow duration-300 hover:shadow-xl">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3">
-                  <feature.icon className="h-6 w-6 text-primary" />
-                  <span className="font-headline text-2xl">{feature.title}</span>
-                </CardTitle>
-                <CardDescription>{feature.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow" />
-              <div className="flex items-center p-6 pt-0">
-                <Button asChild>
-                  <Link href={feature.href}>
-                    Explore <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            </Card>
-          ))}
+        <div className="space-y-4">
+          <AppointmentCard title="Today's Appointments" />
         </div>
+
+        <div className="space-y-4">
+          <AppointmentCard title="Upcoming Appointments" />
+        </div>
+
       </div>
     </AppLayout>
   );
