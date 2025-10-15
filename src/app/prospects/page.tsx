@@ -251,7 +251,7 @@ export default function ProspectsPage() {
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={onDragStart} onDragEnd={onDragEnd}>
             {view === 'kanban' && (
-                 <div className="flex flex-wrap gap-4 pb-4">
+                 <div className="flex gap-4 pb-4 overflow-x-auto">
                     <SortableContext items={statuses.map(s => s.id)} strategy={horizontalListSortingStrategy}>
                         {statuses.map(status => (
                             <KanbanColumn 
