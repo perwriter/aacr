@@ -33,8 +33,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="p-2 group-data-[collapsed=icon]:p-0 group-data-[collapsed=icon]:pt-2">
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-data-[collapsed=icon]:left-1/2 group-data-[collapsed=icon]:-translate-x-1/2" />
-              <SidebarInput placeholder="Search leads..." className="pl-8 group-data-[collapsed=icon]:hidden" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-data-[collapsed=icon]:left-1/2 group-data-[collapsed=icon]:-translate-x-1/2" />
+              <SidebarInput placeholder="Search leads..." className="pl-9 group-data-[collapsed=icon]:hidden" />
             </div>
           </div>
         </SidebarHeader>
