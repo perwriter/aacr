@@ -3,25 +3,26 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, GripVertical, LayoutGrid, List, Phone, Trello } from 'lucide-react';
+import { AlertCircle, GripVertical, LayoutGrid, List, MoreHorizontal, Phone, Trello } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragOverlay, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const initialStatuses = [
-  'NEW',
-  'Prospect',
-  'Qualified',
-  'Warm',
-  'Hot',
-  'Canceled',
-  'Ghosted',
-  'Hold',
-  'Client In Process',
+  {id: 'NEW', title: 'NEW', color: '#8A2BE2'},
+  {id: 'Prospect', title: 'Prospect', color: '#4169E1'},
+  {id: 'Qualified', title: 'Qualified', color: '#3CB371'},
+  {id: 'Warm', title: 'Warm', color: '#FFA500'},
+  {id: 'Hot', title: 'Hot', color: '#FF4500'},
+  {id: 'Canceled', title: 'Canceled', color: '#696969'},
+  {id: 'Ghosted', title: 'Ghosted', color: '#A9A9A9'},
+  {id: 'Hold', title: 'Hold', color: '#D2B48C'},
+  {id: 'Client In Process', title: 'Client In Process', color: '#008080'},
 ];
 
 const initialProspects = [
@@ -34,6 +35,7 @@ const initialProspects = [
     status: 'Qualified',
     lastContacted: 'Oct 1, 2025',
     followUp: true,
+    dealValue: 50000,
   },
   {
     id: '2',
@@ -44,6 +46,7 @@ const initialProspects = [
     status: 'Warm',
     lastContacted: 'Oct 1, 2025',
     followUp: true,
+    dealValue: 75000,
   },
   {
     id: '3',
@@ -54,6 +57,7 @@ const initialProspects = [
     status: 'Ghosted',
     lastContacted: 'Oct 1, 2025',
     followUp: true,
+    dealValue: 20000,
   },
   {
     id: '4',
@@ -64,87 +68,103 @@ const initialProspects = [
     status: 'Hot',
     lastContacted: 'Oct 1, 2025',
     followUp: false,
+    dealValue: 120000,
   },
 ];
 
 type Prospect = typeof initialProspects[0];
 
-const getStatusBadgeVariant = (status: string) => {
-  switch (status.toLowerCase()) {
-    case 'hot':
-      return 'destructive';
-    case 'warm':
-    case 'qualified':
-      return 'default';
-    case 'new':
-    case 'prospect':
-        return 'secondary'
-    default:
-      return 'outline';
-  }
-};
+const getStatusInfo = (status: string) => {
+    return initialStatuses.find(s => s.id === status) || { title: status, color: '#808080' };
+}
 
-const ProspectCard = ({ prospect, onStatusChange, isOverlay = false, ...props }: { prospect: Prospect, onStatusChange: (id: string, status: string) => void, isOverlay?: boolean, [key: string]: any }) => {
+const ProspectCard = ({ prospect, isOverlay = false, ...props }: { prospect: Prospect, isOverlay?: boolean, [key: string]: any }) => {
+    const statusInfo = getStatusInfo(prospect.status);
     return (
-        <Card className={`mb-4 ${isOverlay ? 'shadow-lg' : ''}`} {...props}>
-            <CardContent className="p-4 space-y-4">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <p className="font-semibold text-base">{prospect.name}</p>
-                        <p className="text-sm text-muted-foreground">{prospect.email}</p>
-                    </div>
-                     <Select value={prospect.status} onValueChange={(value) => onStatusChange(prospect.id, value)}>
-                        <SelectTrigger className="w-[130px] text-xs h-8">
-                            <SelectValue placeholder="Status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {initialStatuses.map(s => <SelectItem key={s} value={s}><Badge className="w-full justify-center" variant={getStatusBadgeVariant(s)}>{s}</Badge></SelectItem>)}
-                        </SelectContent>
-                    </Select>
+        <Card className={`mb-4 ${isOverlay ? 'shadow-lg' : 'shadow-sm hover:shadow-md transition-shadow'}`} {...props}>
+            <CardContent className="p-4 space-y-3 relative">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-1 right-1 h-7 w-7"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuItem>Edit Prospect</DropdownMenuItem>
+                        <DropdownMenuItem>Archive Prospect</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <div className="space-y-1 pr-8">
+                    <p className="font-bold text-base leading-tight truncate" title={prospect.name}>{prospect.name}</p>
+                    <p className="text-sm text-muted-foreground">{prospect.email}</p>
                 </div>
-                <div className="text-sm text-muted-foreground">Lead Source: <span className="font-medium text-foreground">{prospect.leadSource}</span></div>
                 
+                <div className="text-xs text-muted-foreground">Lead Source: <span className="font-medium text-foreground">{prospect.leadSource}</span></div>
+
                 {prospect.followUp && (
                     <div className="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-950/50 p-2 rounded-md">
                         <AlertCircle className="h-5 w-5" />
                         <span className="text-xs font-semibold">Two Weeks No Contact, Follow Up Now?</span>
                     </div>
                 )}
+                 <div className="flex items-center justify-between text-sm pt-2">
+                    <span className="font-semibold">
+                        ${prospect.dealValue?.toLocaleString()}
+                    </span>
+                    <Badge variant="outline" style={{ borderColor: statusInfo.color, color: statusInfo.color }}>{prospect.status}</Badge>
+                </div>
             </CardContent>
         </Card>
     )
 }
 
-const SortableProspectCard = ({ prospect, onStatusChange }: { prospect: Prospect, onStatusChange: (id: string, status: string) => void }) => {
+const SortableProspectCard = ({ prospect }: { prospect: Prospect }) => {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: prospect.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
 
     return (
-        <div ref={setNodeRef} style={style} >
-            <div className="relative">
-                 <ProspectCard prospect={prospect} onStatusChange={onStatusChange} />
-                 <div className="absolute top-4 right-4 text-muted-foreground cursor-grab" {...attributes} {...listeners}>
-                    <GripVertical className="h-5 w-5" />
-                </div>
-            </div>
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            <ProspectCard prospect={prospect} />
         </div>
     )
 }
 
-const KanbanColumn = ({ status, prospects, onStatusChange }: { status: string, prospects: Prospect[], onStatusChange: (id: string, status: string) => void }) => {
-    const { setNodeRef } = useSortable({ id: status });
+const KanbanColumn = ({ status, prospects, onStatusChange }: { status: {id: string, title: string, color: string}, prospects: Prospect[], onStatusChange: (id: string, status: string) => void }) => {
+    const { setNodeRef } = useSortable({ id: status.id });
+    const totalValue = prospects.reduce((sum, p) => sum + (p.dealValue || 0), 0);
+
     return (
-        <div ref={setNodeRef} className="w-72 shrink-0">
-            <Card className="bg-muted/50">
-                <CardContent className="p-4">
-                     <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
-                        <span>{status}</span>
-                        <Badge variant={getStatusBadgeVariant(status)}>{prospects.length}</Badge>
-                    </h3>
+        <div ref={setNodeRef} className="w-[320px] flex-shrink-0">
+            <Card className="bg-muted/50 h-full flex flex-col">
+                <CardHeader className="pb-2 border-b">
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                        <span
+                          className="h-3 w-3 rounded-full inline-block"
+                          style={{ backgroundColor: status.color }}
+                        ></span>
+                        {status.title}
+                      </CardTitle>
+                      <div
+                        className="text-xs font-semibold text-white rounded-full px-2 py-0.5"
+                        style={{ backgroundColor: status.color }}
+                      >
+                        {prospects.length}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground pt-1 pb-2">
+                      ${totalValue.toLocaleString()} in this stage
+                    </p>
+                </CardHeader>
+                <CardContent className="flex-1 space-y-3 p-4 pt-2 overflow-y-auto min-h-[200px]">
                     <SortableContext items={prospects.map(p => p.id)} strategy={verticalListSortingStrategy}>
-                        <div className="space-y-4">
-                            {prospects.map(p => <SortableProspectCard key={p.id} prospect={p} onStatusChange={onStatusChange} />)}
-                        </div>
+                        {prospects.map(p => <SortableProspectCard key={p.id} prospect={p} />)}
                     </SortableContext>
                 </CardContent>
             </Card>
@@ -156,7 +176,7 @@ const KanbanColumn = ({ status, prospects, onStatusChange }: { status: string, p
 export default function ProspectsPage() {
   const [view, setView] = useState('kanban');
   const [prospects, setProspects] = useState<Prospect[]>(initialProspects);
-  const [statuses, setStatuses] = useState(initialStatuses);
+  const [statuses] = useState(initialStatuses);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor));
@@ -171,37 +191,36 @@ export default function ProspectsPage() {
   
   const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over) {
-        setActiveId(null);
+    setActiveId(null);
+    if (!over) return;
+
+    const activeProspect = prospects.find(p => p.id === active.id);
+    if (!activeProspect) return;
+
+    const overId = over.id as string;
+
+    // Dropped on a column
+    if (statuses.some(s => s.id === overId) && activeProspect.status !== overId) {
+        setProspects(prev => arrayMove(prev.map(p => p.id === active.id ? { ...p, status: overId } : p), prev.findIndex(p => p.id === active.id), prev.length -1 ));
         return;
     }
 
+    const overProspect = prospects.find(p => p.id === overId);
+    if (!overProspect) return;
+
+    // Dropped on another prospect card
     if (active.id !== over.id) {
-        const isColumn = statuses.includes(over.id as string);
-        if (isColumn) {
-            const newStatus = over.id as string;
-            setProspects(prev => prev.map(p => p.id === active.id ? { ...p, status: newStatus } : p));
+        const oldIndex = prospects.findIndex(p => p.id === active.id);
+        const newIndex = prospects.findIndex(p => p.id === over.id);
+
+        if (activeProspect.status === overProspect.status) {
+            setProspects(items => arrayMove(items, oldIndex, newIndex));
         } else {
-            const overIsProspect = prospects.some(p => p.id === over.id);
-            if (overIsProspect) {
-                const activeProspect = prospects.find(p => p.id === active.id);
-                const overProspect = prospects.find(p => p.id === over.id);
-                if (activeProspect && overProspect && activeProspect.status === overProspect.status) {
-                     setProspects((items) => {
-                        const oldIndex = items.findIndex(p => p.id === active.id);
-                        const newIndex = items.findIndex(p => p.id === over.id);
-                        return arrayMove(items, oldIndex, newIndex);
-                    });
-                } else if (activeProspect && overProspect && activeProspect.status !== overProspect.status) {
-                    setProspects(prev => prev.map(p => p.id === active.id ? { ...p, status: overProspect.status } : p));
-                }
-            } else {
-                 const newStatus = over.id as string;
-                 setProspects(prev => prev.map(p => p.id === active.id ? { ...p, status: newStatus } : p));
-            }
+             const movedProspects = prospects.map(p => p.id === active.id ? { ...p, status: overProspect.status } : p);
+             const reorderedProspects = arrayMove(movedProspects, oldIndex, newIndex);
+             setProspects(reorderedProspects);
         }
     }
-    setActiveId(null);
   };
 
   const activeProspect = activeId ? prospects.find(p => p.id === activeId) : null;
@@ -217,9 +236,9 @@ export default function ProspectsPage() {
         <div className="flex justify-between items-center">
             <div className="flex flex-wrap items-center gap-2">
                 <Button variant="outline">ALL ({prospects.length})</Button>
-                {initialStatuses.map((status) => (
-                    <Button key={status} variant="outline">
-                        {status} ({prospects.filter(p => p.status === status).length})
+                {statuses.map((status) => (
+                    <Button key={status.id} variant="outline">
+                        {status.title} ({prospects.filter(p => p.status === status.id).length})
                     </Button>
                 ))}
             </div>
@@ -233,18 +252,18 @@ export default function ProspectsPage() {
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={onDragStart} onDragEnd={onDragEnd}>
             {view === 'kanban' && (
                  <div className="flex flex-wrap gap-4 pb-4">
-                    <SortableContext items={statuses} strategy={horizontalListSortingStrategy}>
+                    <SortableContext items={statuses.map(s => s.id)} strategy={horizontalListSortingStrategy}>
                         {statuses.map(status => (
                             <KanbanColumn 
-                                key={status} 
+                                key={status.id} 
                                 status={status} 
-                                prospects={prospects.filter(p => p.status === status)}
+                                prospects={prospects.filter(p => p.status === status.id)}
                                 onStatusChange={handleStatusChange}
                             />
                         ))}
                     </SortableContext>
                     <DragOverlay>
-                        {activeProspect ? <ProspectCard prospect={activeProspect} onStatusChange={handleStatusChange} isOverlay /> : null}
+                        {activeProspect ? <ProspectCard prospect={activeProspect} isOverlay /> : null}
                     </DragOverlay>
                 </div>
             )}
@@ -284,12 +303,12 @@ export default function ProspectsPage() {
                                     </Button>
                                 </TableCell>
                                 <TableCell>
-                                    <Select value={prospect.status} onValueChange={(value) => handleStatusChange(prospect.id, value)}>
-                                        <SelectTrigger className="w-[120px] text-xs h-8">
-                                            <Badge variant={getStatusBadgeVariant(prospect.status)}>{prospect.status}</Badge>
+                                     <Select value={prospect.status} onValueChange={(value) => handleStatusChange(prospect.id, value)}>
+                                        <SelectTrigger className="w-[130px] text-xs h-8">
+                                            <SelectValue placeholder="Status" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {initialStatuses.map(s => <SelectItem key={s} value={s}><Badge className="w-full justify-center" variant={getStatusBadgeVariant(s)}>{s}</Badge></SelectItem>)}
+                                            {statuses.map(s => <SelectItem key={s.id} value={s.id}>{s.title}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </TableCell>
@@ -308,7 +327,7 @@ export default function ProspectsPage() {
         {view === 'grid' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {prospects.map(prospect => (
-                    <ProspectCard key={prospect.id} prospect={prospect} onStatusChange={handleStatusChange} />
+                    <ProspectCard key={prospect.id} prospect={prospect} />
                 ))}
             </div>
         )}
