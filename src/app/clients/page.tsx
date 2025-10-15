@@ -5,7 +5,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, FileText, DollarSign, BarChart, Star, List, LayoutGrid, Trello, MoreHorizontal, Phone, Mail, Calendar, ChevronDown, Edit, Archive, Pin, FilePdf, CheckCircle } from 'lucide-react';
+import { Users, FileText, DollarSign, BarChart, Star, List, LayoutGrid, Trello, MoreHorizontal, Phone, Mail, Calendar, ChevronDown, Edit, Archive, Pin, File, CheckCircle } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragOverlay, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -247,7 +247,7 @@ const ClientSheet = ({ client, children, statuses }: { client: Client, children:
                                             <CheckCircle className="h-3 w-3 text-green-500" />
                                             Signed on October 2, 2025 at 11:38 AM
                                         </div>
-                                        <Button variant="outline" size="sm" className="mt-2"><FilePdf className="mr-2 h-4 w-4" /> View PDF</Button>
+                                        <Button variant="outline" size="sm" className="mt-2"><File className="mr-2 h-4 w-4" /> View PDF</Button>
                                     </CardContent>
                                 </Card>
                                 <Card>
@@ -260,7 +260,7 @@ const ClientSheet = ({ client, children, statuses }: { client: Client, children:
                                             <CheckCircle className="h-3 w-3 text-green-500" />
                                             Signed on October 2, 2025 at 11:37 AM
                                         </div>
-                                        <Button variant="outline" size="sm" className="mt-2"><FilePdf className="mr-2 h-4 w-4" /> View PDF</Button>
+                                        <Button variant="outline" size="sm" className="mt-2"><File className="mr-2 h-4 w-4" /> View PDF</Button>
                                     </CardContent>
                                 </Card>
                            </div>
@@ -522,5 +522,3 @@ export default function ClientsPage() {
     </AppLayout>
   );
 }
-
-    
