@@ -134,7 +134,7 @@ const SortableProspectCard = ({ prospect, onStatusChange }: { prospect: Prospect
 const KanbanColumn = ({ status, prospects, onStatusChange }: { status: string, prospects: Prospect[], onStatusChange: (id: string, status: string) => void }) => {
     const { setNodeRef } = useSortable({ id: status });
     return (
-        <div ref={setNodeRef} className="w-full md:w-1/3 lg:w-1/4 xl:w-1/5 shrink-0">
+        <div ref={setNodeRef} className="w-80 shrink-0">
             <Card className="bg-muted/50">
                 <CardContent className="p-4">
                      <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
