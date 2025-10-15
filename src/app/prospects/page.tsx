@@ -134,7 +134,7 @@ const SortableProspectCard = ({ prospect, onStatusChange }: { prospect: Prospect
 const KanbanColumn = ({ status, prospects, onStatusChange }: { status: string, prospects: Prospect[], onStatusChange: (id: string, status: string) => void }) => {
     const { setNodeRef } = useSortable({ id: status });
     return (
-        <div ref={setNodeRef} className="w-80 shrink-0">
+        <div ref={setNodeRef} className="w-72 shrink-0">
             <Card className="bg-muted/50">
                 <CardContent className="p-4">
                      <h3 className="text-lg font-semibold mb-4 flex items-center justify-between">
@@ -232,7 +232,7 @@ export default function ProspectsPage() {
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={onDragStart} onDragEnd={onDragEnd}>
             {view === 'kanban' && (
-                 <div className="flex gap-4 overflow-x-auto pb-4">
+                 <div className="flex flex-wrap gap-4 pb-4">
                     <SortableContext items={statuses} strategy={horizontalListSortingStrategy}>
                         {statuses.map(status => (
                             <KanbanColumn 
