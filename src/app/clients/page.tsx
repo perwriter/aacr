@@ -5,7 +5,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, FileText, DollarSign, BarChart, Star, List, LayoutGrid, Trello, MoreHorizontal, Phone, Mail, Calendar, ChevronDown, Edit, Archive } from 'lucide-react';
+import { Users, FileText, DollarSign, BarChart, Star, List, LayoutGrid, Trello, MoreHorizontal, Phone, Mail, Calendar, ChevronDown, Edit, Archive, Pin, FilePdf, CheckCircle } from 'lucide-react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragOverlay, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 
 
 const StatCard = ({
@@ -99,44 +101,173 @@ const statuses = [
     { id: 'Needs Review', title: 'Needs Review', color: '#FFA500' },
 ];
 
-const ClientSheet = ({ client, children }: { client: Client, children: React.ReactNode }) => (
+const ClientSheet = ({ client, children, statuses }: { client: Client, children: React.ReactNode, statuses: {id: string, title: string}[] }) => (
     <Sheet>
         <SheetTrigger asChild>{children}</SheetTrigger>
-        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-             <SheetHeader>
-                <SheetTitle className="text-2xl font-bold">{client.name}</SheetTitle>
-                <p className="text-sm text-muted-foreground">{client.email}</p>
-            </SheetHeader>
-            <div className="py-6 space-y-6">
-                <div className="flex items-center gap-4">
-                    <Avatar className="h-20 w-20">
-                        <AvatarImage src={client.avatar} alt={client.name} />
-                        <AvatarFallback>{client.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <p className="text-2xl font-bold">{client.totalValue}</p>
-                        <p className="text-sm text-muted-foreground">Total Value from {client.deals} deals</p>
+        <SheetContent className="w-full sm:max-w-4xl overflow-y-auto p-0">
+             <div className="p-6">
+                 <SheetHeader className="mb-6">
+                    <div className="flex items-center justify-between">
+                        <SheetTitle className="text-2xl font-bold">{client.name}</SheetTitle>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="flex items-center gap-2">
+                                    Client
+                                    <ChevronDown className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem>Un-Assign</DropdownMenuItem>
+                                <Separator />
+                                <DropdownMenuItem>Prospect</DropdownMenuItem>
+                                <DropdownMenuItem>Qualified</DropdownMenuItem>
+                                <DropdownMenuItem>Warm</DropdownMenuItem>
+                                <DropdownMenuItem>Hot</DropdownMenuItem>
+                                <DropdownMenuItem>Client In Process</DropdownMenuItem>
+                                <DropdownMenuItem>Client</DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
-                </div>
-                <Separator />
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> <span>{client.email}</span></div>
-                    <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-muted-foreground" /> <span>(555) 123-4567</span></div>
-                    <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" /> <span>Last deal: {client.lastDeal}</span></div>
-                </div>
-                 <Separator />
-                 <div>
-                    <h3 className="font-semibold mb-2">Review Status</h3>
-                    {client.status === 'Reviewed' ? (
-                        <div className="flex items-center gap-2 text-green-600">
-                            <Star className="h-5 w-5" />
-                            <span>Review collected</span>
+                 </SheetHeader>
+                 
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                     <div className="md:col-span-2 space-y-8">
+                        {/* Main content */}
+                        <div>
+                            <h3 className="font-semibold mb-4 text-lg">Contact Information</h3>
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div><span className="font-medium text-muted-foreground">Phone</span><p>(555) 567-8901</p></div>
+                                <div><span className="font-medium text-muted-foreground">Email</span><p>{client.email}</p></div>
+                                <div><span className="font-medium text-muted-foreground">Address</span><p>654 Maple Dr, Seattle, WA 98101</p></div>
+                                <div><span className="font-medium text-muted-foreground">Date of Birth</span><p>08/17/1997</p></div>
+                                <div><span className="font-medium text-muted-foreground">Social Security Number</span><p>517-31-0354</p></div>
+                                <div><span className="font-medium text-muted-foreground">Gold IRA Account Number</span><p>1234TTT</p></div>
+                            </div>
                         </div>
-                    ) : (
-                        <Button variant="outline">Request Review</Button>
-                    )}
-                </div>
-            </div>
+
+                        <div>
+                           <h3 className="font-semibold mb-4 text-lg">Lead Ownership</h3>
+                           <div className="flex items-center justify-between">
+                               <div className="flex items-center gap-2">
+                                  <Avatar>
+                                    <AvatarFallback>LO</AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <p className="font-semibold">Lead Owner</p>
+                                    <Button variant="link" className="p-0 h-auto">Takeover</Button>
+                                  </div>
+                               </div>
+                                <Input placeholder="Add user..." className="max-w-xs"/>
+                           </div>
+                            <div className="mt-4 text-sm">
+                                <span className="font-medium text-muted-foreground">Source</span>
+                                <p>Radio</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 className="font-semibold mb-4 text-lg">Notes (1 pinned)</h3>
+                            <div className="space-y-4">
+                                <Textarea placeholder="Add a new note..." />
+                                <Button>Add Note</Button>
+                                <div className="space-y-3 text-sm">
+                                    <h4 className="font-medium text-muted-foreground">Pinned Notes</h4>
+                                    <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md border border-yellow-200 dark:border-yellow-800">
+                                        <p>this is a test lead showing what a pin is for ssn DOB ACT number Guy has 400k Raymond James ETC important notes go here so they dont get barried by NA notes</p>
+                                        <p className="text-xs text-muted-foreground mt-2">Current User - Sep 29, 2025 1:24 AM</p>
+                                    </div>
+
+                                    <h4 className="font-medium text-muted-foreground pt-4">Recent Notes</h4>
+                                    <div className="p-3 bg-muted/50 rounded-md">
+                                        <p>note</p>
+                                        <p className="text-xs text-muted-foreground">Current User - Sep 28, 2025 11:28 PM</p>
+                                    </div>
+                                     <div className="p-3 bg-muted/50 rounded-md">
+                                        <p>note</p>
+                                        <p className="text-xs text-muted-foreground">Current User - Sep 28, 2025 11:28 PM</p>
+                                    </div>
+                                    <Button variant="link" size="sm">Show 2 More Notes</Button>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+
+                     <div className="space-y-8">
+                        {/* Sidebar content */}
+                        <div>
+                            <h3 className="font-semibold mb-4 text-lg flex items-center gap-2"><Calendar className="h-5 w-5" /> Appointments (1)</h3>
+                            <div className="text-sm space-y-2">
+                                <p className="font-medium">Past (1)</p>
+                                <Card>
+                                    <CardContent className="p-3">
+                                        <p className="font-semibold">{client.name}</p>
+                                        <p className="text-muted-foreground">Cash 100k Test Meeting</p>
+                                        <p className="text-xs text-muted-foreground mt-1">Sep 29, 2025 6:00 PM</p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
+                        <Separator />
+                        <div>
+                             <h3 className="font-semibold mb-2 text-lg">Create Invoice</h3>
+                             <div className="space-y-3">
+                                <Card className="bg-muted/50">
+                                    <CardContent className="p-4">
+                                        <h4 className="font-semibold">Cash Purchase</h4>
+                                        <p className="text-xs text-muted-foreground mb-2">Standard cash transaction</p>
+                                    </CardContent>
+                                </Card>
+                                <Card className="bg-muted/50">
+                                    <CardContent className="p-4">
+                                        <h4 className="font-semibold">IRA Purchase</h4>
+                                        <p className="text-xs text-muted-foreground mb-2">Individual Retirement Account</p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
+
+                        <Separator />
+
+                        <div>
+                           <h3 className="font-semibold mb-4 text-lg flex items-center gap-2"><FileText className="h-5 w-5" /> Deals</h3>
+                           <div className="space-y-2 mb-4">
+                               <p className="text-sm text-muted-foreground">Total Deal Value</p>
+                               <p className="text-2xl font-bold">{client.totalValue}</p>
+                               <p className="text-sm text-muted-foreground">Completed Deals</p>
+                               <p className="text-2xl font-bold">{client.deals}</p>
+                           </div>
+                           <div className="space-y-4">
+                                <Card>
+                                    <CardHeader className="p-3">
+                                        <CardTitle className="text-sm">Invoice #225002</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-3 pt-0 text-sm">
+                                        <p>IRA - Oct 2, 2025 - $6,000</p>
+                                        <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                                            <CheckCircle className="h-3 w-3 text-green-500" />
+                                            Signed on October 2, 2025 at 11:38 AM
+                                        </div>
+                                        <Button variant="outline" size="sm" className="mt-2"><FilePdf className="mr-2 h-4 w-4" /> View PDF</Button>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="p-3">
+                                        <CardTitle className="text-sm">Invoice #225001</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-3 pt-0 text-sm">
+                                        <p>Cash - Oct 2, 2025 - $12,900</p>
+                                        <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                                            <CheckCircle className="h-3 w-3 text-green-500" />
+                                            Signed on October 2, 2025 at 11:37 AM
+                                        </div>
+                                        <Button variant="outline" size="sm" className="mt-2"><FilePdf className="mr-2 h-4 w-4" /> View PDF</Button>
+                                    </CardContent>
+                                </Card>
+                           </div>
+                       </div>
+                     </div>
+                 </div>
+             </div>
         </SheetContent>
     </Sheet>
 )
@@ -144,7 +275,7 @@ const ClientSheet = ({ client, children }: { client: Client, children: React.Rea
 
 const ClientCard = ({ client, isOverlay = false }: { client: Client, isOverlay?: boolean }) => (
     <Card className={`hover:shadow-md transition-shadow ${isOverlay ? 'shadow-lg' : ''}`}>
-        <ClientSheet client={client}>
+        <ClientSheet client={client} statuses={[]}>
             <CardContent className="p-4 grid grid-cols-1 items-center gap-4 cursor-pointer">
                 <div className="flex items-center gap-4">
                 <Avatar className="h-12 w-12">
@@ -345,7 +476,7 @@ export default function ClientsPage() {
                         {clients.map(client => (
                             <TableRow key={client.id}>
                                 <TableCell>
-                                     <ClientSheet client={client}>
+                                     <ClientSheet client={client} statuses={[]}>
                                         <div className="font-medium cursor-pointer hover:underline">{client.name}</div>
                                      </ClientSheet>
                                     <div className="text-sm text-muted-foreground">{client.email}</div>
@@ -391,3 +522,5 @@ export default function ClientsPage() {
     </AppLayout>
   );
 }
+
+    
