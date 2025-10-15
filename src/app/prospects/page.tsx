@@ -81,7 +81,7 @@ const getStatusInfo = (status: string) => {
 const ProspectCard = ({ prospect, isOverlay = false, ...props }: { prospect: Prospect, isOverlay?: boolean, [key: string]: any }) => {
     const statusInfo = getStatusInfo(prospect.status);
     return (
-        <Card className={`mb-4 ${isOverlay ? 'shadow-lg' : 'shadow-sm hover:shadow-md transition-shadow'}`} {...props}>
+        <Card className={`mb-4 bg-background ${isOverlay ? 'shadow-lg' : 'shadow-sm hover:shadow-md transition-shadow'}`} {...props}>
             <CardContent className="p-4 space-y-3 relative">
                 <div className="absolute top-2 right-2 flex items-center">
                     <DropdownMenu>
@@ -134,8 +134,8 @@ const SortableProspectCard = ({ prospect }: { prospect: Prospect }) => {
 
     return (
         <div ref={setNodeRef} style={style}>
-            <div className="flex items-center">
-                <div {...attributes} {...listeners} className="cursor-grab p-2 text-muted-foreground hover:bg-accent rounded-l-md">
+            <div className="flex items-start">
+                <div {...attributes} {...listeners} className="cursor-grab p-2 pt-4 text-muted-foreground hover:bg-accent rounded-l-md">
                     <GripVertical className="h-5 w-5" />
                 </div>
                 <div className="flex-grow">
@@ -151,7 +151,7 @@ const KanbanColumn = ({ status, prospects }: { status: {id: string, title: strin
     const totalValue = prospects.reduce((sum, p) => sum + (p.dealValue || 0), 0);
 
     return (
-        <div ref={setNodeRef} className="w-[320px] flex-shrink-0">
+        <div ref={setNodeRef} className="w-[300px] flex-shrink-0">
             <Card className="bg-muted/50 h-full flex flex-col">
                 <CardHeader className="pb-2 border-b">
                     <div className="flex justify-between items-center">
@@ -244,7 +244,7 @@ export default function ProspectsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-7xl">
         <div>
           <h2 className="font-headline text-3xl">Prospects</h2>
           <p className="text-muted-foreground">Manage your potential clients.</p>
