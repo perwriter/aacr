@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, GripVertical, LayoutGrid, List, MoreHorizontal, Phone, Trello, ChevronLeft, ChevronRight, User, Calendar, FileText, ChevronDown } from 'lucide-react';
+import { AlertCircle, GripVertical, LayoutGrid, List, MoreHorizontal, Phone, Trello, ChevronLeft, ChevronRight, User, Calendar, FileText, ChevronDown, AtSign } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragOverlay, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
@@ -17,7 +17,8 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 const initialStatuses = [
   {id: 'NEW', title: 'NEW', color: '#8A2BE2'},
@@ -391,9 +392,72 @@ export default function ProspectsPage() {
   return (
     <AppLayout>
       <div className="space-y-6 max-w-7xl">
-        <div>
-          <h2 className="font-headline text-3xl">Prospects</h2>
-          <p className="text-muted-foreground">Manage your potential clients.</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h2 className="font-headline text-3xl">Prospects</h2>
+            <p className="text-muted-foreground">Manage your potential clients.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="default">
+                  <Calendar className="mr-2 h-4 w-4" /> Create Meeting
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create Meeting</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="meeting-title">Meeting Title</Label>
+                    <Input id="meeting-title" placeholder="e.g. Quarterly Review" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="meeting-date">Date</Label>
+                    <Input id="meeting-date" type="date" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="meeting-time">Time</Label>
+                    <Input id="meeting-time" type="time" />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit">Schedule</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="default">
+                  <AtSign className="mr-2 h-4 w-4" /> Send Email
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Send Email</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email-recipient">Recipient</Label>
+                    <Input id="email-recipient" placeholder="client@example.com" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email-subject">Subject</Label>
+                    <Input id="email-subject" placeholder="e.g. Follow-up" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email-body">Body</Label>
+                    <Textarea id="email-body" placeholder="Hi there," />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button type="submit">Send</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <div className="flex flex-wrap justify-between items-center gap-4">
