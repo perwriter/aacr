@@ -6,12 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, GripVertical, LayoutGrid, List, MoreHorizontal, Phone, Trello, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertCircle, GripVertical, LayoutGrid, List, MoreHorizontal, Phone, Trello, ChevronLeft, ChevronRight, User, Calendar, FileText, ChevronDown } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragOverlay, DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 const initialStatuses = [
   {id: 'NEW', title: 'NEW', color: '#8A2BE2'},
@@ -140,7 +146,9 @@ const SortableProspectCard = ({ prospect, statuses }: { prospect: Prospect, stat
                     <GripVertical className="h-5 w-5" />
                 </div>
                 <div className="flex-grow">
-                    <ProspectCard prospect={prospect} statuses={statuses} />
+                     <ProspectSheet prospect={prospect} statuses={statuses}>
+                        <ProspectCard prospect={prospect} statuses={statuses} />
+                    </ProspectSheet>
                 </div>
             </div>
         </div>
@@ -184,6 +192,133 @@ const KanbanColumn = ({ status, prospects, statuses }: { status: Status, prospec
     );
 };
 
+const ProspectSheet = ({ prospect, statuses, children }: { prospect: Prospect, statuses: Status[], children: React.ReactNode }) => {
+    return (
+        <Sheet>
+            <SheetTrigger asChild>{children}</SheetTrigger>
+            <SheetContent className="w-full sm:max-w-4xl overflow-y-auto p-0">
+                <div className="p-6">
+                    <SheetHeader className="mb-6">
+                        <div className="flex items-center justify-between">
+                            <SheetTitle className="text-2xl font-bold">{prospect.name}</SheetTitle>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" className="flex items-center gap-2">
+                                        {getStatusInfo(statuses, prospect.status).title}
+                                        <ChevronDown className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent>
+                                    <DropdownMenuItem>Un-Assign</DropdownMenuItem>
+                                    <Separator />
+                                    {statuses.map(s => <DropdownMenuItem key={s.id}>{s.title}</DropdownMenuItem>)}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </SheetHeader>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="md:col-span-2 space-y-8">
+                           {/* Main content */}
+                           <div>
+                                <h3 className="font-semibold mb-4 text-lg">Contact Information</h3>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div><span className="font-medium text-muted-foreground">Phone</span><p>{prospect.phone}</p></div>
+                                    <div><span className="font-medium text-muted-foreground">Email</span><p>{prospect.email}</p></div>
+                                    <div><span className="font-medium text-muted-foreground">Address</span><p>N/A</p></div>
+                                    <div><span className="font-medium text-muted-foreground">Date of Birth</span><p>N/A</p></div>
+                                    <div><span className="font-medium text-muted-foreground">Social Security Number</span><p>N/A</p></div>
+                                    <div><span className="font-medium text-muted-foreground">Gold IRA Account Number</span><p>N/A</p></div>
+                                </div>
+                           </div>
+
+                           <div>
+                               <h3 className="font-semibold mb-4 text-lg">Lead Ownership</h3>
+                               <div className="flex items-center justify-between">
+                                   <div className="flex items-center gap-2">
+                                      <Avatar>
+                                        <AvatarFallback>LO</AvatarFallback>
+                                      </Avatar>
+                                      <div>
+                                        <p className="font-semibold">Lead Owner</p>
+                                        <Button variant="link" className="p-0 h-auto">Takeover</Button>
+                                      </div>
+                                   </div>
+                                    <Input placeholder="Add user..." className="max-w-xs"/>
+                               </div>
+                                <div className="mt-4 text-sm">
+                                    <span className="font-medium text-muted-foreground">Source</span>
+                                    <p>{prospect.leadSource}</p>
+                                </div>
+                           </div>
+
+                           <div>
+                               <h3 className="font-semibold mb-4 text-lg">Notes</h3>
+                               <div className="space-y-4">
+                                   <Textarea placeholder="Add a new note..." />
+                                   <Button>Add Note</Button>
+                                   <div className="text-sm space-y-3">
+                                       <p className="text-muted-foreground">Recent Notes</p>
+                                       <div className="p-3 bg-muted rounded-md">
+                                           <p>NA - No Answer</p>
+                                           <p className="text-xs text-muted-foreground">gabegreenofficial@gmail.com - Oct 1, 2025 12:06 AM</p>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                        </div>
+
+                        <div className="space-y-8">
+                           {/* Sidebar content */}
+                           <div>
+                                <h3 className="font-semibold mb-4 text-lg flex items-center gap-2"><Calendar className="h-5 w-5" /> Appointments (0)</h3>
+                                <p className="text-sm text-muted-foreground">No appointments scheduled</p>
+                           </div>
+                           <Separator />
+                           <div>
+                                <h3 className="font-semibold mb-2 text-lg">Create Invoice</h3>
+                                <div className="space-y-3">
+                                    <Card className="bg-muted/50">
+                                        <CardContent className="p-4">
+                                            <h4 className="font-semibold">Cash Purchase</h4>
+                                            <p className="text-xs text-muted-foreground mb-2">Standard cash transaction</p>
+                                            <p className="text-xs font-semibold">Required Documents:</p>
+                                            <ul className="text-xs list-disc pl-4 text-muted-foreground">
+                                                <li>Invoice</li>
+                                                <li>Transaction Agreement</li>
+                                            </ul>
+                                        </CardContent>
+                                    </Card>
+                                    <Card className="bg-muted/50">
+                                        <CardContent className="p-4">
+                                            <h4 className="font-semibold">IRA Purchase</h4>
+                                            <p className="text-xs text-muted-foreground mb-2">Individual Retirement Account</p>
+                                            <p className="text-xs font-semibold">Required Documents:</p>
+                                            <ul className="text-xs list-disc pl-4 text-muted-foreground">
+                                                <li>Invoice</li>
+                                                <li>Transaction Agreement</li>
+                                                <li>AET Buy Sell Form</li>
+                                                <li>AET Hold Harmless Form</li>
+                                            </ul>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                           </div>
+
+                           <Separator />
+
+                            <div>
+                               <h3 className="font-semibold mb-4 text-lg flex items-center gap-2"><FileText className="h-5 w-5" /> Deals</h3>
+                               <p className="text-sm text-muted-foreground">No signed deals yet</p>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            </SheetContent>
+        </Sheet>
+    );
+};
+
 
 export default function ProspectsPage() {
   const [view, setView] = useState('kanban');
@@ -219,19 +354,24 @@ export default function ProspectsPage() {
     }
 
     const overProspect = prospects.find(p => p.id === overId);
-    if (!overProspect) return;
+    if (overProspect) {
+      if (active.id !== over.id) {
+          const oldIndex = prospects.findIndex(p => p.id === active.id);
+          const newIndex = prospects.findIndex(p => p.id === over.id);
 
-    if (active.id !== over.id) {
-        const oldIndex = prospects.findIndex(p => p.id === active.id);
-        const newIndex = prospects.findIndex(p => p.id === over.id);
-
-        if (activeProspect.status === overProspect.status) {
-            setProspects(items => arrayMove(items, oldIndex, newIndex));
-        } else {
-             const movedProspects = prospects.map(p => p.id === active.id ? { ...p, status: overProspect.status } : p);
-             const reorderedProspects = arrayMove(movedProspects, oldIndex, newIndex);
-             setProspects(reorderedProspects);
-        }
+          if (activeProspect.status === overProspect.status) {
+              setProspects(items => arrayMove(items, oldIndex, newIndex));
+          } else {
+              const movedProspects = prospects.map(p => p.id === active.id ? { ...p, status: overProspect.status } : p);
+              const reorderedProspects = arrayMove(movedProspects, oldIndex, newIndex);
+              setProspects(reorderedProspects);
+          }
+      }
+    } else { // dropped on a column
+      const overColumnId = over.id;
+      if (activeProspect.status !== overColumnId) {
+        handleStatusChange(active.id as string, overColumnId as string);
+      }
     }
   };
 
@@ -276,25 +416,44 @@ export default function ProspectsPage() {
             </div>
         </div>
 
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-            {view === 'kanban' && (
-                 <div ref={kanbanContainerRef} className="flex gap-4 pb-4 overflow-x-auto">
-                    <SortableContext items={statuses.map(s => s.id)} strategy={horizontalListSortingStrategy}>
-                        {statuses.map(status => (
-                            <KanbanColumn 
-                                key={status.id} 
-                                status={status}
-                                statuses={statuses}
-                                prospects={prospects.filter(p => p.status === status.id)}
-                            />
-                        ))}
-                    </SortableContext>
-                    <DragOverlay>
-                        {activeProspect ? <ProspectCard prospect={activeProspect} statuses={statuses} isOverlay /> : null}
-                    </DragOverlay>
-                </div>
-            )}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+        >
+          {view === 'kanban' && (
+            <div
+              ref={kanbanContainerRef}
+              className="flex gap-4 pb-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent scroll-smooth"
+            >
+              <SortableContext
+                items={statuses.map((s) => s.id)}
+                strategy={horizontalListSortingStrategy}
+              >
+                {statuses.map((status) => (
+                  <KanbanColumn
+                    key={status.id}
+                    status={status}
+                    statuses={statuses}
+                    prospects={prospects.filter((p) => p.status === status.id)}
+                  />
+                ))}
+              </SortableContext>
+
+              <DragOverlay>
+                {activeProspect ? (
+                  <ProspectCard
+                    prospect={activeProspect}
+                    statuses={statuses}
+                    isOverlay
+                  />
+                ) : null}
+              </DragOverlay>
+            </div>
+          )}
         </DndContext>
+
 
         {view === 'list' && (
             <Card>
@@ -313,17 +472,19 @@ export default function ProspectsPage() {
                         <TableBody>
                             {prospects.map((prospect) => (
                             <TableRow key={prospect.email}>
-                                <TableCell>
-                                    <div className="font-medium">{prospect.name}</div>
-                                    <div className="text-sm text-muted-foreground">{prospect.email}</div>
-                                    <div className="text-xs text-muted-foreground mt-1">Lead Source: {prospect.leadSource}</div>
-                                    {prospect.followUp && (
-                                        <div className="mt-2 flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
-                                            <AlertCircle className="h-4 w-4" />
-                                            <span className="text-xs font-medium">Two Weeks No Contact, Follow Up Now?</span>
-                                        </div>
-                                    )}
-                                </TableCell>
+                              <TableCell>
+                                <ProspectSheet prospect={prospect} statuses={statuses}>
+                                    <div className="font-medium cursor-pointer hover:underline">{prospect.name}</div>
+                                </ProspectSheet>
+                                <div className="text-sm text-muted-foreground">{prospect.email}</div>
+                                <div className="text-xs text-muted-foreground mt-1">Lead Source: {prospect.leadSource}</div>
+                                {prospect.followUp && (
+                                    <div className="mt-2 flex items-center gap-2 text-yellow-600 dark:text-yellow-400">
+                                        <AlertCircle className="h-4 w-4" />
+                                        <span className="text-xs font-medium">Two Weeks No Contact, Follow Up Now?</span>
+                                    </div>
+                                )}
+                              </TableCell>
                                 <TableCell>
                                     <Button variant="ghost" size="sm">
                                         <Phone className="mr-2 h-4 w-4" />
@@ -356,7 +517,9 @@ export default function ProspectsPage() {
         {view === 'grid' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {prospects.map(prospect => (
-                    <ProspectCard key={prospect.id} prospect={prospect} statuses={statuses} />
+                   <ProspectSheet key={prospect.id} prospect={prospect} statuses={statuses}>
+                        <ProspectCard prospect={prospect} statuses={statuses} />
+                   </ProspectSheet>
                 ))}
             </div>
         )}
